@@ -1,0 +1,149 @@
+{% extends 'base.html' %}
+{% block content %}
+<style>
+  th, td {
+    font-size: 0.85rem;
+    padding: 0.35rem;
+    vertical-align: middle;
+  }
+
+  .sticky-top {
+    position: sticky;
+    top: 0;
+    z-index: 1030;
+    background-color: white;
+    padding-top: 0.5rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid #dee2e6;
+  }
+</style>
+
+<div class="container mt-4">
+  <!-- Sticky Header -->
+  <div class="sticky-top">
+    <h4 class="mb-2 text-start">Inventario de equipos</h4>
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-2">
+      <div class="d-flex gap-2">
+        <a href="{% url 'registrar_equipo' %}" class="btn btn-success btn-sm">Registrar nuevo equipo</a>
+        <a href="{% url 'exportar_excel' %}?q={{ palabra_clave }}&codigo_barras={{ codigo_barras }}&estado={{ estado_seleccionado }}&ubicacion={{ ubicacion_seleccionada }}&prestamo={{ prestamo_seleccionado }}" class="btn btn-danger btn-sm">Exportar a Excel</a>
+      </div>
+
+      <!-- Buscador y Filtros -->
+      <form method="GET" class="d-flex gap-2 flex-wrap align-items-center">
+        <input type="text" name="q" class="form-control form-control-sm" placeholder="Palabra clave" value="{{ palabra_clave }}">
+        <input type="text" name="codigo_barras" id="codigo_barras_input" class="form-control form-control-sm" placeholder="Código de barras" value="{{ codigo_barras }}">
+
+        <!-- Filtro Estado -->
+        <select name="estado" class="form-select form-select-sm">
+          <option value="">Estado</option>
+          {% for opcion in estados %}
+            <option value="{{ opcion }}" {% if opcion == estado_seleccionado %}selected{% endif %}>{{ opcion }}</option>
+          {% endfor %}
+        </select>
+
+        <!-- Filtro Ubicación -->
+        <select name="ubicacion" class="form-select form-select-sm">
+          <option value="">Ubicación</option>
+          {% for opcion in ubicaciones %}
+            <option value="{{ opcion }}" {% if opcion == ubicacion_seleccionada %}selected{% endif %}>{{ opcion }}</option>
+          {% endfor %}
+        </select>
+
+        <!-- Checkbox ¿En préstamo? -->
+        <div class="form-check form-check-inline align-self-center">
+          <input class="form-check-input" type="checkbox" name="prestamo" id="prestamoCheck" {% if prestamo_seleccionado == 'on' %}checked{% endif %}>
+          <label class="form-check-label" for="prestamoCheck">¿En préstamo?</label>
+        </div>
+
+        <button type="submit" class="btn btn-primary btn-sm">Buscar</button>
+        <a href="{% url 'inventario' %}" class="btn btn-sm" style="background-color: #6F4E37; color: white;">Limpiar</a>
+      </form>
+    </div>
+  </div>
+
+  <!-- Tabla -->
+  <table class="table table-bordered table-hover table-sm align-middle mt-2">
+    <thead class="table-light">
+      <tr>
+        <th>#</th>
+        <th>Equipo</th>
+        <th>Tipo</th>
+        <th>Marca</th>
+        <th>Modelo</th>
+        <th>Ubicación</th>
+        <th>Estado</th>
+        <th>Detalle</th>
+        <th>Código</th>
+        <th>Foto</th>
+        <th>Adquisición</th>
+        <th>Fondo</th>
+        <th>Solicitante</th>
+        <th>Inicio</th>
+        <th>Fin</th>
+        <th>Duración</th>
+        <th>Acciones</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for equipo in equipos %}
+        <tr>
+          <td>{{ forloop.counter }}</td>
+          <td>{{ equipo.equipo }}</td>
+          <td>{{ equipo.tipo_equipo }}</td>
+          <td>{{ equipo.marca }}</td>
+          <td>{{ equipo.modelo }}</td>
+          <td>{{ equipo.ubicacion }}</td>
+          <td>{{ equipo.estado }}</td>
+          <td>{{ equipo.detalle }}</td>
+          <td>
+            {{ equipo.codigo }}<br>
+            {% if equipo.codigo_barras %}
+              <img src="{{ equipo.codigo_barras.url }}" alt="Código de Barras" style="width: 100px;">
+            {% else %}
+              No generado
+            {% endif %}
+          </td>
+          <td>
+            {% if equipo.foto %}
+              <img src="{{ equipo.foto.url }}" alt="Foto" style="width: 40px;">
+            {% else %}
+              No disponible
+            {% endif %}
+          </td>
+          <td>{{ equipo.fecha_adquisicion|date:"d/m/Y" }}</td>
+          <td>{{ equipo.fondo_adquisicion }}</td>
+          <td>{{ equipo.nombre_solicitante }}</td>
+          <td>{{ equipo.fecha_inicio_prestamo }}</td>
+          <td>{{ equipo.fecha_fin_prestamo }}</td>
+          <td>
+            {% if equipo.duracion %}
+              {{ equipo.duracion }} días
+            {% else %}
+              -
+            {% endif %}
+          </td>
+          <td>
+            <a href="{% url 'editar_equipo' equipo.id %}" class="btn btn-warning btn-sm">Editar</a>
+          </td>
+        </tr>
+      {% empty %}
+        <tr>
+          <td colspan="17" class="text-center">No se encontraron equipos.</td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+<script>
+  // Búsqueda automática cuando el código de barras tiene 12 dígitos
+  document.addEventListener('DOMContentLoaded', () => {
+    const input = document.getElementById('codigo_barras_input');
+    input.addEventListener('input', function () {
+      if (this.value.length === 12) {
+        this.form.submit();
+      }
+    });
+  });
+</script>
+{% endblock %}

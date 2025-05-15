@@ -1,0 +1,208 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+<style>
+  th, td {
+    font-size: 0.85rem;
+    padding: 0.35rem;
+    vertical-align: middle;
+  }
+
+  .sticky-top {
+    position: sticky;
+    top: 65px;
+    z-index: 1030;
+    background-color: white;
+    color: #333;
+    padding-top: 0.5rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid #dee2e6;
+    box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.05);
+  }
+
+  thead th {
+    position: sticky;
+    top: 140px;
+    background-color: #00449e;
+    color: white;
+    z-index: 1020;
+  }
+
+  /* Prestamo dinámico */
+  #prestamoSelect {
+    transition: background-color 0.3s ease, color 0.3s ease;
+  }
+  #prestamoSelect.prestado {
+    background-color: #FF0000;   /* ✅ Verde */
+    color: white;
+    font-weight: bold;
+  }
+
+  #prestamoSelect.disponible {
+    background-color: #2E7D32; /* 🔥 Rojo semi-transparente (80% opacidad) */
+    color: white;
+    font-weight: bold;
+  }
+
+</style>
+
+<div class="container mt-4">
+  <div class="sticky-top">
+    <h4 class="mb-2 text-start">Inventario de equipos</h4>
+
+    <!-- 🔥 🔥 🔥 CORRECCIÓN AQUÍ: Agrupamos bien todos los filtros con botones 🔥 🔥 🔥 -->
+    <form method="GET" class="d-flex flex-wrap align-items-center gap-2 justify-content-between">
+
+      <!-- Botones a la izquierda -->
+      <div class="d-flex gap-2">
+        <a href="{% url 'registrar_equipo' %}" class="btn btn-success btn-sm">Registrar nuevo equipo</a>
+        <a href="{% url 'exportar_excel' %}?q={{ palabra_clave }}&codigo_barras={{ codigo_barras }}&estado={{ estado_seleccionado }}&ubicacion={{ ubicacion_seleccionada }}&prestamo={{ prestamo_seleccionado }}" class="btn btn-danger btn-sm">Exportar a Excel</a>
+      </div>
+
+      <!-- Buscador y Filtros -->
+      <div class="d-flex flex-wrap gap-2 align-items-center">
+
+        <!-- Palabra clave -->
+        <input type="text" name="q" class="form-control form-control-sm" placeholder="Palabra clave" value="{{ palabra_clave }}">
+
+        <!-- Código de barras -->
+        <input type="text" name="codigo_barras" id="codigo_barras_input" class="form-control form-control-sm" placeholder="Código de barras" value="{{ codigo_barras }}">
+
+       <!-- Estado -->
+        <select name="estado" class="form-select form-select-sm">
+          <option value="">Estado</option>  <!-- 🔥 Opción de adorno -->
+          {% for opcion in estados %}
+            <option value="{{ opcion }}" {% if opcion == estado_seleccionado %}selected{% endif %}>{{ opcion }}</option>
+          {% endfor %}
+        </select>
+
+        <!-- Ubicación -->
+        <select name="ubicacion" class="form-select form-select-sm">
+          <option value="">Ubicación</option>  <!-- 🔥 Opción de adorno -->
+          {% for opcion in ubicaciones %}
+            <option value="{{ opcion }}" {% if opcion == ubicacion_seleccionada %}selected{% endif %}>{{ opcion }}</option>
+          {% endfor %}
+        </select>
+
+        <!-- ¿En préstamo? -->
+        <select id="prestamoSelect" name="prestamo" class="form-select form-select-sm">
+          <option value="">¿En préstamo?</option>  <!-- 🔥 Opción de adorno -->
+          <option value="prestado" {% if prestamo_seleccionado == 'prestado' %}selected{% endif %}>Prestado</option>
+          <option value="disponible" {% if prestamo_seleccionado == 'disponible' %}selected{% endif %}>Disponible</option>
+        </select>
+
+
+        <!-- Botón Filtrar -->
+        <button type="submit" class="btn btn-primary btn-sm">Filtrar</button>
+
+        <!-- Botón Limpiar -->
+        <a href="{% url 'inventario' %}" class="btn btn-sm" style="background-color: #6F4E37; color: white;">Limpiar</a>
+
+      </div>
+    </form>
+    <!-- 🔥 🔥 🔥 Fin del form corregido 🔥 🔥 🔥 -->
+
+  </div>
+
+  <!-- Tabla -->
+  <table class="table table-bordered table-hover table-sm align-middle mt-2">
+    <thead class="table-light">
+      <tr>
+        <th>#</th>
+        <th>Equipo</th>
+        <th>Tipo</th>
+        <th>Marca</th>
+        <th>Modelo</th>
+        <th>Ubicación</th>
+        <th>Estado</th>
+        <th>Detalle</th>
+        <th>Código</th>
+        <th>Foto</th>
+        <th>Adquisición</th>
+        <th>Fondo</th>
+        <th>Solicitante</th>
+        <th>Inicio</th>
+        <th>Fin</th>
+        <th>Duración</th>
+        <th>Acciones</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for equipo in equipos %}
+        <tr>
+          <td>{{ forloop.counter }}</td>
+          <td>{{ equipo.equipo }}</td>
+          <td>{{ equipo.tipo_equipo }}</td>
+          <td>{{ equipo.marca }}</td>
+          <td>{{ equipo.modelo }}</td>
+          <td>{{ equipo.ubicacion }}</td>
+          <td>{{ equipo.estado }}</td>
+          <td>{{ equipo.detalle }}</td>
+          <td>
+            {{ equipo.codigo }}<br>
+            {% if equipo.codigo_barras %}
+              <img src="{{ equipo.codigo_barras.url }}" alt="Código de Barras" style="width: 100px;">
+            {% else %}
+              No generado
+            {% endif %}
+          </td>
+          <td>
+            {% if equipo.foto %}
+              <img src="{{ equipo.foto.url }}" alt="Foto" style="width: 40px;">
+            {% else %}
+              No disponible
+            {% endif %}
+          </td>
+          <td>{{ equipo.fecha_adquisicion|date:"d/m/Y" }}</td>
+          <td>{{ equipo.fondo_adquisicion }}</td>
+          <td>{{ equipo.nombre_solicitante }}</td>
+          <td>{{ equipo.fecha_inicio_prestamo }}</td>
+          <td>{{ equipo.fecha_fin_prestamo }}</td>
+          <td>
+            {% if equipo.duracion %}
+              {{ equipo.duracion }} días
+            {% else %}
+              -
+            {% endif %}
+          </td>
+          <td>
+            <a href="{% url 'editar_equipo' equipo.id %}" class="btn btn-warning btn-sm">Editar</a>
+          </td>
+        </tr>
+      {% empty %}
+        <tr>
+          <td colspan="17" class="text-center">No se encontraron equipos.</td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+<!-- Scripts -->
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    const prestamoSelect = document.getElementById('prestamoSelect');
+
+    function actualizarColorPrestamo() {
+      prestamoSelect.classList.remove('prestado', 'disponible');
+      if (prestamoSelect.value === 'prestado') {
+        prestamoSelect.classList.add('prestado');
+      } else if (prestamoSelect.value === 'disponible') {
+        prestamoSelect.classList.add('disponible');
+      }
+    }
+
+    actualizarColorPrestamo(); // Al cargar
+
+    prestamoSelect.addEventListener('change', actualizarColorPrestamo);
+
+    // Búsqueda automática código de barras
+    const input = document.getElementById('codigo_barras_input');
+    input.addEventListener('input', function () {
+      if (this.value.length === 12) {
+        this.form.submit();
+      }
+    });
+  });
+</script>
+{% endblock %}

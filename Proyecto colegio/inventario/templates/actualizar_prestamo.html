@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+
+
+{% block content %}
+  <h2>Actualizar préstamo para {{ inventario.equipo }}</h2>
+  
+  <form method="post">
+    {% csrf_token %}
+    <div>
+        <label for="id_prestamo_activo">¿En préstamo?</label>
+        {{ form.prestamo_activo }}
+    </div>
+    <div>
+        <label for="id_nombre_prestamo">Nombre del solicitante:</label>
+        {{ form.nombre_prestamo }}
+    </div>
+    <div>
+        <label for="id_fecha_inicio_prestamo">Fecha inicio del préstamo:</label>
+        {{ form.fecha_inicio_prestamo }}
+    </div>
+    <div>
+        <label for="id_fecha_fin_prestamo">Fecha fin del préstamo:</label>
+        {{ form.fecha_fin_prestamo }}
+    </div>
+    <button type="submit">Actualizar</button>
+  </form>
+{% endblock %}

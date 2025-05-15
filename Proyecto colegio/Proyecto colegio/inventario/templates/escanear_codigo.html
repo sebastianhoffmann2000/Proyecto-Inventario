@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+
+{% load static %}
+
+{% block content %}
+    <div class="container">
+        <h2 class="mb-4">Escanear Código</h2>
+
+        <!-- Instrucciones para el escaneo -->
+        <p>Utiliza tu escáner de código de barras o introduce manualmente el código del equipo.</p>
+
+        <!-- Formulario para escanear código -->
+        <form method="GET" action="{% url 'escanear_codigo' %}">
+            <div class="mb-3">
+                <label for="codigo" class="form-label">Código del Equipo</label>
+                <input type="text" class="form-control" id="codigo" name="codigo" placeholder="Escanea o ingresa el código del equipo" required>
+            </div>
+            <button type="submit" class="btn btn-primary">Buscar Equipo</button>
+        </form>
+
+        {% if equipo %}
+            <h3 class="mt-4">Resultados del escaneo</h3>
+            <div class="card mt-3">
+                <div class="card-body">
+                    <h5 class="card-title">Equipo: {{ equipo.equipo }}</h5>
+                    <p><strong>Marca:</strong> {{ equipo.marca }}</p>
+                    <p><strong>Modelo:</strong> {{ equipo.modelo }}</p>
+                    <p><strong>Ubicación:</strong> {{ equipo.ubicacion }}</p>
+                    <p><strong>Estado:</strong> {{ equipo.estado }}</p>
+                    <p><strong>Código:</strong> {{ equipo.codigo }}</p>
+                </div>
+            </div>
+        {% elif request.GET.codigo %}
+            <p>No se encontró un equipo con el código ingresado.</p>
+        {% endif %}
+    </div>
+{% endblock %}

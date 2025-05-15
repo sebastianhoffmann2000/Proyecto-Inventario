@@ -1,0 +1,119 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container mt-5">
+  <h2>Registrar Nuevo Equipo</h2>
+  <form method="POST" enctype="multipart/form-data">
+    {% csrf_token %}
+
+    <!-- Equipo -->
+    <div class="mb-3">
+      <label class="form-label">Equipo:</label>
+      {{ form.equipo }}
+    </div>
+
+    <!-- Tipo equipo -->
+    <div class="mb-3">
+      <label class="form-label">Tipo equipo:</label>
+      {{ form.tipo_equipo }}
+    </div>
+
+    <!-- Marca -->
+    <div class="mb-3">
+      <label class="form-label">Marca:</label>
+      {{ form.marca }}
+    </div>
+
+    <!-- Modelo -->
+    <div class="mb-3">
+      <label class="form-label">Modelo:</label>
+      {{ form.modelo }}
+    </div>
+
+    <!-- Ubicación -->
+    <div class="mb-3">
+      <label class="form-label">Ubicación:</label>
+      {{ form.ubicacion }}
+    </div>
+
+    <!-- Estado -->
+    <div class="mb-3">
+      <label class="form-label">Estado:</label>
+      {{ form.estado }}
+    </div>
+
+    <div class="mb-3">
+      <label class="form-label">Detalle:</label>
+      {{ form.detalle }}
+    </div>
+    
+
+    <!-- Código generado automáticamente -->
+    <div class="mb-3">
+      <label for="id_codigo" class="form-label">Código:</label>
+      <input type="text" id="id_codigo" name="codigo" class="form-control" readonly>
+      <small class="text-muted">Se generará automáticamente</small>
+    </div>
+
+    <!-- Fecha de adquisición -->
+    <div class="mb-3">
+      <label class="form-label">Fecha de adquisición:</label>
+      <input type="date" name="fecha_adquisicion" id="id_fecha_adquisicion"
+             value="{{ form.fecha_adquisicion.value|default_if_none:'' }}"
+             class="form-control">
+    </div>
+
+    <!-- Fondo adquisición -->
+    <div class="mb-3">
+      <label class="form-label">Fondo adquisición:</label>
+      {{ form.fondo_adquisicion }}
+    </div>
+
+    <!-- Código de Barras generado automáticamente -->
+    <div class="mb-3">
+      <label class="form-label">Código de Barras:</label>
+      <div id="barcode-preview" class="mt-2"></div>
+    </div>
+
+    <!-- Foto -->
+    <div class="mb-3">
+      <label class="form-label">Foto:</label>
+      {{ form.foto }}
+      <small class="text-muted">No se eligió ningún archivo</small>
+    </div>
+
+    <button type="submit" class="btn btn-primary">Registrar Equipo</button>
+  </form>
+</div>
+
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    // ✅ Generar código EAN-13 válido: 12 dígitos numéricos
+    let codigo = '';
+    for (let i = 0; i < 12; i++) {
+      codigo += Math.floor(Math.random() * 10).toString();
+    }
+    document.getElementById('id_codigo').value = codigo;
+
+    // Llamar a la vista para generar el código de barras
+    fetch("{% url 'generar_codigo_barra' %}?codigo=" + encodeURIComponent(codigo))
+      .then(response => response.json())
+      .then(data => {
+        if (data.barcode) {
+          var img = document.createElement("img");
+          img.src = "data:image/png;base64," + data.barcode;
+          img.alt = "Código de Barras";
+          img.style.width = "200px";
+          document.getElementById("barcode-preview").appendChild(img);
+        } else {
+          document.getElementById("barcode-preview").innerText = "Error al generar el código de barras.";
+        }
+      })
+      .catch(err => {
+        document.getElementById("barcode-preview").innerText = "Error de red al generar código.";
+        console.error(err);
+      });
+  });
+</script>
+{% endblock %}

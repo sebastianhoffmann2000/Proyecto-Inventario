@@ -1,0 +1,14 @@
+<td>
+    {% if inventario.duracion_dias != None %}
+        {{ inventario.duracion_dias }} días
+    {% else %}
+        No disponible
+    {% endif %}
+</td>
+<td>
+    {% if inventario.dias_restantes != None %}
+        {{ inventario.dias_restantes }} días restantes
+    {% else %}
+        No disponible
+    {% endif %}
+</td>

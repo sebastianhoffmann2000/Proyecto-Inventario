@@ -1,0 +1,64 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-5">
+    <h2 class="mb-4">Detalle del Equipo</h2>
+
+    <div class="mb-3">
+        <strong>Equipo:</strong> {{ inventario.equipo }}
+    </div>
+
+    <div class="mb-3">
+        <strong>Tipo de Equipo:</strong> {{ inventario.tipo_equipo }}
+    </div>
+
+    <div class="mb-3">
+        <strong>Marca:</strong> {{ inventario.marca }}
+    </div>
+
+    <div class="mb-3">
+        <strong>Modelo:</strong> {{ inventario.modelo }}
+    </div>
+
+    <div class="mb-3">
+        <strong>Ubicación:</strong> {{ inventario.ubicacion }}
+    </div>
+
+    <div class="mb-3">
+        <strong>Estado:</strong> {{ inventario.estado }}
+    </div>
+
+    <div class="mb-3">
+        <strong>Código:</strong> {{ inventario.codigo }}
+    </div>
+
+    <hr>
+    <h4 class="text-primary">Información de Adquisición</h4>
+    <div class="mb-3">
+        <strong>Fecha de adquisición:</strong> 
+        {{ inventario.fecha_adquisicion|date:"d/m/Y" }}
+    </div>
+    <div class="mb-3">
+        <strong>Fondo de adquisición:</strong> {{ inventario.fondo_adquisicion }}
+    </div>
+    <div class="mb-3">
+        <strong>Subvención escolar:</strong> {{ inventario.subvencion_escolar|default:"-" }}
+    </div>
+
+    <hr>
+    <h4 class="text-primary">Foto del equipo</h4>
+    {% if inventario.foto %}
+        <img src="{{ inventario.foto.url }}" alt="Foto del equipo" class="img-fluid rounded" width="300">
+    {% else %}
+        <p class="text-muted">No disponible</p>
+    {% endif %}
+
+    <hr>
+    <h4 class="text-primary">Código de Barras</h4>
+    {% if inventario.codigo_barras %}
+        <img src="{{ inventario.codigo_barras.url }}" alt="Código de Barras" width="200">
+    {% else %}
+        <p class="text-muted">No disponible</p>
+    {% endif %}
+</div>
+{% endblock %}

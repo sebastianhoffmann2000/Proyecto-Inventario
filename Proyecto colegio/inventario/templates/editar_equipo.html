@@ -1,0 +1,153 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container my-3">
+  <h4 class="text-center mb-3">Editar Equipo</h4>
+
+  <form method="post" enctype="multipart/form-data" onsubmit="return confirmarGuardar();">
+    {% csrf_token %}
+    <div class="row gx-2 gy-1">
+      <!-- Columna Izquierda -->
+      <div class="col-md-6">
+        <div class="mb-1">
+          <label class="form-label">Equipo:</label> {{ form.equipo }}
+        </div>
+        <div class="mb-1">
+          <label class="form-label">Tipo:</label> {{ form.tipo_equipo }}
+        </div>
+        <div class="mb-1">
+          <label class="form-label">Marca:</label> {{ form.marca }}
+        </div>
+        <div class="mb-1">
+          <label class="form-label">Modelo:</label> {{ form.modelo }}
+        </div>
+        <div class="mb-1">
+          <label class="form-label">Ubicación:</label> {{ form.ubicacion }}
+        </div>
+        <div class="mb-1">
+          <label class="form-label">Estado:</label> {{ form.estado }}
+        </div>
+        <div class="mb-1">
+          <label class="form-label">Detalle:</label>
+          {{ form.detalle }}
+        </div>
+        
+
+        {% if equipo.foto %}
+          <div class="mb-2">
+            <label class="form-label">Foto actual:</label><br>
+            <img src="{{ equipo.foto.url }}" alt="Foto actual" class="img-thumbnail" style="max-width: 100px;">
+          </div>
+        {% endif %}
+
+        <div class="mb-2">
+          <label class="form-label">Cambiar foto:</label>
+          <input type="file" name="foto" class="form-control form-control-sm">
+        </div>
+      </div>
+
+      <!-- Columna Derecha -->
+      <div class="col-md-6">
+        <div class="mb-1">
+          <label class="form-label">Código de Barras:</label><br>
+          {% if equipo.codigo_barras %}
+            <img src="{{ equipo.codigo_barras.url }}" alt="Código de Barras" style="max-width: 120px;">
+          {% else %}
+            <span class="text-muted">Aún no generado</span>
+          {% endif %}
+        </div>
+        <div class="mb-1">
+          <label class="form-label">Fecha adquisición:</label>
+          <input type="date" name="fecha_adquisicion" id="id_fecha_adquisicion"
+                 value="{{ equipo.fecha_adquisicion|date:'Y-m-d' }}" class="form-control form-control-sm">
+        </div>
+        <div class="mb-1">
+          <label class="form-label">Fondo adquisición:</label> {{ form.fondo_adquisicion }}
+        </div>
+        <div class="form-check my-1">
+          {{ form.prestamo_activo }}
+          <label class="form-check-label" for="id_prestamo_activo">¿En préstamo?</label>
+        </div>
+
+        <!-- Info de préstamo -->
+        <div id="prestamo_info" class="row gx-2 gy-1 mt-2 {% if not form.prestamo_activo.value %}d-none{% endif %}">
+  
+          <div class="col-md-6">
+            <label class="form-label mb-1">Solicitante:</label>
+            {{ form.nombre_solicitante }}
+          </div>
+          
+          <div class="col-md-6">
+            <label class="form-label mb-1">Inicio:</label>
+            <input type="date" name="fecha_inicio_prestamo" id="id_fecha_inicio_prestamo"
+                   value="{{ form.fecha_inicio_prestamo.value|default_if_none:'' }}" class="form-control form-control-sm">
+          </div>
+        
+          <div class="col-md-6">
+            <label class="form-label mb-1">Fin:</label>
+            <input type="date" name="fecha_fin_prestamo" id="id_fecha_fin_prestamo"
+                   value="{{ form.fecha_fin_prestamo.value|default_if_none:'' }}" class="form-control form-control-sm">
+          </div>
+        
+          <div class="col-md-6">
+            <label class="form-label mb-1">Duración:</label>
+            <input type="text" id="id_duracion"
+                   value="{% if form.instance.duracion %}{{ form.instance.duracion }} días{% else %}{% endif %}"
+                   class="form-control form-control-sm" readonly>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Botones -->
+    <div class="row mt-3 gx-2">
+      <div class="col-auto">
+        <button type="submit" class="btn btn-sm btn-primary px-3">Guardar</button>
+      </div>
+    </div>
+  </form>
+
+  <!-- Formulario de eliminación separado -->
+  <div class="row mt-2 gx-2">
+    <div class="col-auto">
+      <form method="post" action="{% url 'eliminar_equipo' equipo.id %}" onsubmit="return confirm('¿Estás seguro de eliminar el equipo?');">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-sm btn-danger px-3">
+          <i class="bi bi-trash-fill"></i> Eliminar
+        </button>
+      </form>
+    </div>
+  </div>
+</div>
+
+<script>
+  function calcularDuracion() {
+    const inicio = document.getElementById('id_fecha_inicio_prestamo').value;
+    const fin = document.getElementById('id_fecha_fin_prestamo').value;
+    if (inicio && fin) {
+      const start = new Date(inicio);
+      const end = new Date(fin);
+      const dias = Math.floor((end - start) / (1000 * 60 * 60 * 24));
+      document.getElementById('id_duracion').value = dias >= 0 ? dias + ' días' : 'Retrasado ' + Math.abs(dias) + ' días';
+    }
+  }
+
+  function togglePrestamoInfo() {
+    const activo = document.getElementById('id_prestamo_activo').checked;
+    document.getElementById('prestamo_info').classList.toggle('d-none', !activo);
+  }
+
+  function confirmarGuardar() {
+    return confirm("¿Estás seguro de guardar los cambios?");
+  }
+
+  document.addEventListener("DOMContentLoaded", () => {
+    togglePrestamoInfo();
+    calcularDuracion();
+    document.getElementById('id_prestamo_activo').addEventListener('change', togglePrestamoInfo);
+    document.getElementById('id_fecha_inicio_prestamo').addEventListener('change', calcularDuracion);
+    document.getElementById('id_fecha_fin_prestamo').addEventListener('change', calcularDuracion);
+  });
+</script>
+{% endblock %}

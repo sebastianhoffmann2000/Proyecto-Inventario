@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+
+
+{% load static %}
+
+{% block content %}
+    <div class="text-center">
+        <h1 class="display-4 mb-4">Bienvenido al Sistema de Inventario Escolar</h1>
+        <p class="lead">Gestiona fácilmente los equipos, computadoras, libros y más de la escuela.</p>
+
+        <!-- Imagen de bienvenida -->
+        <img src="{% static 'img/logo2.png' %}" alt="Logo Escolar" class="img-fluid my-4" style="max-width: 250px;">
+
+        <!-- Botones de navegación -->
+        <div class="mt-4">
+            <a href="{% url 'inventario' %}" class="btn btn-primary btn-lg">Ver Inventario</a>
+            <a href="{% url 'exportar_excel' %}" class="btn btn-danger btn-lg">Exportar a Excel</a>
+        </div>
+    </div>
+{% endblock %}
